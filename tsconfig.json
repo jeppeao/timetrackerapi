@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",                          
-    "module": "ES2020",
+    "target": "es2017",                          
+    "module": "ESNext",
     "moduleResolution": "node",                    
     "lib": ["es6"],                     
     "allowJs": true,
