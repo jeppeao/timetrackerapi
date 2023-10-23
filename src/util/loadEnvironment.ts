@@ -1,3 +1,5 @@
+import { variablesLocal, variablesRemote } from '../env.js';
+
 type EnvironmentVariables = Record<string, string>;
 
 const addEnvironmentVariables = (vars: EnvironmentVariables) => {
@@ -6,12 +8,15 @@ const addEnvironmentVariables = (vars: EnvironmentVariables) => {
   }
 }
 
-const loadEnvironment = async (env: string) => {
+const loadEnvironment = (env: string) => {
   if (env === 'development') {
-    await import('./../env_local.js').then(mod => {
-      addEnvironmentVariables(mod.variables);
-    })
+      addEnvironmentVariables(variablesLocal);
   }
+
+  else {
+    addEnvironmentVariables(variablesRemote);
+}
+  
 }
 
 export default (loadEnvironment)
