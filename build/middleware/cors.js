@@ -7,6 +7,7 @@ const getCorsSetupper = (ALLOWED_ORIGIN) => {
         res.header(`Access-Control-Allow-Origin`, `${ALLOWED_ORIGIN}`);
         res.header(`Access-Control-Allow-Methods`, `POST`);
         res.header(`Access-Control-Allow-Headers`, `Content-Type`);
+        res.header(`Access-Control-Allow-Credentials`, `true`);
         next();
     };
 };
