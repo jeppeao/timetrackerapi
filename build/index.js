@@ -1,6 +1,7 @@
 import express from 'express';
 import loadEnvironment from './util/loadEnvironment.js';
 import router from './router/router.js';
+import { getCorsSetupper } from './middleware/cors.js';
 import https from 'https';
 import fs from 'fs';
 let env = process.env.NODE_ENV || 'development';
@@ -10,6 +11,11 @@ const server_certificates = {
     cert: fs.readFileSync("server.cert"),
 };
 const app = express();
+app.use(getCorsSetupper(process.env.ALLOWED_ORIGIN));
+app.use((req, res, next) => {
+    console.log(req.get('origin'));
+    next();
+});
 app.use('/db', router);
 app.get('/', (req, res, next) => {
     res.status(200).send('Hello World!');

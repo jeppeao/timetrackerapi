@@ -2,6 +2,7 @@ import express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import loadEnvironment from './util/loadEnvironment.js';
 import router from './router/router.js';
+import { getCorsSetupper } from './middleware/cors.js';
 import https from 'https';
 import fs from 'fs';
 
@@ -14,6 +15,8 @@ const server_certificates = {
 }
 
 const app = express ();
+app.use(getCorsSetupper(process.env.ALLOWED_ORIGIN));
+
 app.use('/db', router);
 app.get('/', (req: Request, res: Response, next: NextFunction) => {
   res.status(200).send('Hello World!');
