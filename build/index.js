@@ -5,9 +5,18 @@ import { getCorsSetupper } from './middleware/cors.js';
 import https from 'https';
 import fs from 'fs';
 import session from 'express-session';
+import redis from 'redis';
+import RedisStore from 'connect-redis';
+const redisClient = redis.createClient();
+redisClient.connect().catch(console.error);
+const redisStore = new RedisStore({
+    client: redisClient,
+    prefix: "timetrackerApp:",
+});
 let env = process.env.NODE_ENV || 'development';
 loadEnvironment(env);
 let sessionOptions = {
+    store: redisStore,
     secret: 'keyboard cat',
     resave: false,
     saveUninitialized: true,
