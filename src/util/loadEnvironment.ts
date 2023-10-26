@@ -19,4 +19,4 @@ const loadEnvironment = (env: string) => {
   
 }
 
-export default (loadEnvironment)
+export default loadEnvironment;

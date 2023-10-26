@@ -12,4 +12,4 @@ const loadEnvironment = (env) => {
         addEnvironmentVariables(variablesRemote);
     }
 };
-export default (loadEnvironment);
+export default loadEnvironment;
