@@ -1,10 +1,15 @@
 
+import loadEnvironment from "./../util/loadEnvironment.js";
 import pg from "pg";
 const { Pool } = pg;
 
+
+loadEnvironment();
+
+
 interface Userdata {
   user_id: number,
-  user: string,
+  user_name: string,
   password: string
 }
 
@@ -26,7 +31,15 @@ const createPool = (
   });
 }
 
-const setupTables = async (pool: pg.Pool) => {
+const pool = createPool(
+  process.env.DB_USER || 'undefined_user',
+  process.env.DB_HOST || 'undefined_host',
+  process.env.DB_NAME || 'undefined_dbname',
+  process.env.DB_PASSWORD || 'undefined_password',
+  process.env.DB_PORT || 'undefined_port',
+);
+
+const setupTables = async ( ) => {
   const users = await new Promise((resolve, reject) => {
     pool.query(`CREATE TABLE IF NOT EXISTS users(
       user_id SERIAL PRIMARY KEY,
@@ -104,12 +117,11 @@ const setupTables = async (pool: pg.Pool) => {
 }
 
 const createUser = (
-  pool: pg.Pool, 
   body: {user: string, password: string}
 ) => {
   return new Promise(function(resolve, reject) {
     const { user, password } = body;
-    pool.query(`INSERT INTO users (user, password) VALUES ($1, $2) RETURNING *`, 
+    pool.query(`INSERT INTO users (user_name, password) VALUES ($1, $2) RETURNING *`, 
       [user, password], (error, results) => {
         if (error) {
           reject(error);
@@ -119,7 +131,7 @@ const createUser = (
   });
 }
 
-const getUser = (pool: pg.Pool, user: string): Promise<Userdata> => {
+const getUser = (user: string): Promise<Userdata> => {
   return new Promise(function(resolve, reject) {
     pool.query(`SELECT * FROM users where user_name = $1`, 
       [user], (error, results) => {
@@ -131,7 +143,7 @@ const getUser = (pool: pg.Pool, user: string): Promise<Userdata> => {
   });
 }
 
-const deleteUser = (pool: pg.Pool, user: string) => {
+const deleteUser = (user: string) => {
   return new Promise(function(resolve, reject) {
     pool.query(`DELETE FROM users WHERE user_name = $1 RETURNING *`, 
       [user], (error, results) => {
@@ -143,7 +155,7 @@ const deleteUser = (pool: pg.Pool, user: string) => {
   });
 }
 
-const getPassword = (pool: pg.Pool, user: string) => {
+const getPassword = (user: string) => {
   return new Promise(function(resolve, reject) {
     pool.query(`SELECT password FROM users WHERE user_name = $1`, 
       [user], (error, results) => {
@@ -155,7 +167,7 @@ const getPassword = (pool: pg.Pool, user: string) => {
   });
 }
 
-const setPassword = (pool: pg.Pool, body: {user: string, newPwd:string}) => {
+const setPassword = (body: {user: string, newPwd:string}) => {
   const { user, newPwd } = body;
   return new Promise(function(resolve, reject) {
     pool.query(`UPDATE users SET password = $2 WHERE user_name = $1`, 
@@ -176,7 +188,6 @@ export {
   getPassword,
   setPassword,
   getUser,
-  createPool
 }
 
 

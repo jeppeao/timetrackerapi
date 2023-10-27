@@ -4,7 +4,8 @@ const addEnvironmentVariables = (vars) => {
         process.env[name] = val;
     }
 };
-const loadEnvironment = (env) => {
+const loadEnvironment = () => {
+    let env = process.env.NODE_ENV || 'development';
     if (env === 'development') {
         addEnvironmentVariables(variablesLocal);
     }

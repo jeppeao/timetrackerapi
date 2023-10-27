@@ -6,41 +6,36 @@ import loadEnvironment from './util/loadEnvironment.js';
 import router from './router/router.js';
 import { getCorsSetupper } from './middleware/cors.js';
 import { sessionSetup } from './middleware/session.js';
-import * as db from './db/database.js';
+import * as db from './db/database_api.js';
+import { useAuthentication } from './middleware/authentication.js';
 
 
-let env = process.env.NODE_ENV || 'development';
-loadEnvironment(env);
+loadEnvironment();
 
 const server_certificates = {
   key: fs.readFileSync("server.key"),
   cert: fs.readFileSync("server.cert"),
 }
 
-const app = express ();
+db.setupTables();
 
+const app = express ();
+app.use(express.json());
 app.use(getCorsSetupper(process.env.ALLOWED_ORIGIN));
 app.use(sessionSetup(process.env.SESSION_SECRET));
+app.use(useAuthentication);
 
 app.get('/', (req: Request, res: Response, next: NextFunction) => {
   res.status(200).send('Hello World!');
 })
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log("SessionID: ", req.sessionID)
-  console.log(req.session.user)
-  req.session.user = "exampleUser"
+  console.log("User: ", req.session.user)
   next();
 })
 app.use('/db', router);
 
-const pool = db.createPool(
-  process.env.DB_USER || 'undefined_user',
-  process.env.DB_HOST || 'undefined_host',
-  process.env.DB_NAME || 'undefined_dbname',
-  process.env.DB_PASSWORD || 'undefined_password',
-  process.env.DB_PORT || 'undefined_port',
-);
-db.setupTables(pool);
+
 
 const server = https.createServer(server_certificates, app);
 

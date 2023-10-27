@@ -1,5 +1,7 @@
+import loadEnvironment from "./../util/loadEnvironment.js";
 import pg from "pg";
 const { Pool } = pg;
+loadEnvironment();
 const createPool = (user, host, database, password, port) => {
     return new Pool({
         user,
@@ -9,7 +11,8 @@ const createPool = (user, host, database, password, port) => {
         port: parseInt(port)
     });
 };
-const setupTables = async (pool) => {
+const pool = createPool(process.env.DB_USER || 'undefined_user', process.env.DB_HOST || 'undefined_host', process.env.DB_NAME || 'undefined_dbname', process.env.DB_PASSWORD || 'undefined_password', process.env.DB_PORT || 'undefined_port');
+const setupTables = async () => {
     const users = await new Promise((resolve, reject) => {
         pool.query(`CREATE TABLE IF NOT EXISTS users(
       user_id SERIAL PRIMARY KEY,
@@ -77,10 +80,10 @@ const setupTables = async (pool) => {
     });
     return Promise.all([users, tags, blocks, blockTags]);
 };
-const createUser = (pool, body) => {
+const createUser = (body) => {
     return new Promise(function (resolve, reject) {
         const { user, password } = body;
-        pool.query(`INSERT INTO users (user, password) VALUES ($1, $2) RETURNING *`, [user, password], (error, results) => {
+        pool.query(`INSERT INTO users (user_name, password) VALUES ($1, $2) RETURNING *`, [user, password], (error, results) => {
             if (error) {
                 reject(error);
             }
@@ -88,7 +91,7 @@ const createUser = (pool, body) => {
         });
     });
 };
-const getUser = (pool, user) => {
+const getUser = (user) => {
     return new Promise(function (resolve, reject) {
         pool.query(`SELECT * FROM users where user_name = $1`, [user], (error, results) => {
             if (error) {
@@ -98,7 +101,7 @@ const getUser = (pool, user) => {
         });
     });
 };
-const deleteUser = (pool, user) => {
+const deleteUser = (user) => {
     return new Promise(function (resolve, reject) {
         pool.query(`DELETE FROM users WHERE user_name = $1 RETURNING *`, [user], (error, results) => {
             if (error) {
@@ -108,7 +111,7 @@ const deleteUser = (pool, user) => {
         });
     });
 };
-const getPassword = (pool, user) => {
+const getPassword = (user) => {
     return new Promise(function (resolve, reject) {
         pool.query(`SELECT password FROM users WHERE user_name = $1`, [user], (error, results) => {
             if (error) {
@@ -118,7 +121,7 @@ const getPassword = (pool, user) => {
         });
     });
 };
-const setPassword = (pool, body) => {
+const setPassword = (body) => {
     const { user, newPwd } = body;
     return new Promise(function (resolve, reject) {
         pool.query(`UPDATE users SET password = $2 WHERE user_name = $1`, [user, newPwd], (error, results) => {
@@ -129,4 +132,4 @@ const setPassword = (pool, body) => {
         });
     });
 };
-export { setupTables, createUser, deleteUser, getPassword, setPassword, getUser, createPool };
+export { setupTables, createUser, deleteUser, getPassword, setPassword, getUser, };
