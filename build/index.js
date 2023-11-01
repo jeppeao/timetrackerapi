@@ -6,7 +6,6 @@ import router from './router/router.js';
 import { getCorsSetupper } from './middleware/cors.js';
 import { sessionSetup } from './middleware/session.js';
 import * as db from './db/database_api.js';
-import { useAuthentication } from './middleware/authentication.js';
 loadEnvironment();
 const server_certificates = {
     key: fs.readFileSync("server.key"),
@@ -17,16 +16,12 @@ const app = express();
 app.use(express.json());
 app.use(getCorsSetupper(process.env.ALLOWED_ORIGIN));
 app.use(sessionSetup(process.env.SESSION_SECRET));
-app.use(useAuthentication);
-app.get('/', (req, res, next) => {
-    res.status(200).send('Hello World!');
-});
-app.use((req, res, next) => {
-    console.log("SessionID: ", req.sessionID);
-    console.log("User: ", req.session.user);
-    next();
-});
-app.use('/db', router);
+// app.use((req: Request, res: Response, next: NextFunction) => {
+//   console.log("SessionID: ", req.sessionID)
+//   console.log("User: ", req.session.user)
+//   next();
+// })
+app.use('/', router);
 const server = https.createServer(server_certificates, app);
 server.listen(8443, function () {
     console.log(`Listening on port ${process.env.PORT}!`

@@ -4,7 +4,7 @@ import * as bcrypt from 'bcrypt';
 
 const SALT_ROUNDS = 4;
 
-const userAuthenticated = async (userName: string, pass: string) => {
+const verifyCredentials = async (userName: string, pass: string) => {
   if (!userName || !pass) {
     return false;
   }
@@ -27,10 +27,13 @@ const login = async (
   res: Response, 
   next: NextFunction) => {
     const { userName, password } = req.body;
-    if (await userAuthenticated(userName, password) === true) {
+    const verified = await verifyCredentials(userName, password);
+    if ( verified === true ) {
       req.session.user = `${userName}`;
+      return res.status(200).send(`${userName} logged in`)
+    } else {
+      return res.status(401).send(`Error: Access denied`)
     }
-    next();
 }
 
 const logout = async(
@@ -45,31 +48,22 @@ const logout = async(
     catch (error) {
       return res.status(500).send(error);
     };
-  next();
 }
 
 const userExists = async (userName: string) => {
   const user = await dbApi.getUser(userName);
-  
   return !!user;
 }
 
 const registerUser = async (userName: string, password: string) => {
-  const nameTaken = await userExists(userName);
-  
-  if (!nameTaken) {
-    const hash = await bcrypt.hash(password, SALT_ROUNDS);
-    const body = {
-      user: userName,
-      password: hash
-    }
-    const result = await dbApi.createUser(body);
-    if (result) {
-      return true;
-    }
+  const hash = await bcrypt.hash(password, SALT_ROUNDS);
+  const body = {
+    user: userName,
+    password: hash
   }
+  const result = await dbApi.createUser(body);
 
-  return false;
+  return result ? true : false;
 }
 
 const register = async(
@@ -77,22 +71,44 @@ const register = async(
   res: Response, 
   next: NextFunction) => {
     const { userName, password } = req.body;
-    registerUser(userName, password);
-  }
+    const nameTaken = await userExists(userName);
 
-const useAuthentication = (
+    if (nameTaken) {
+      return res.status(409).send('Error: Username Taken')
+    }
+    const registered = await registerUser(userName, password);
+    if (registered) {
+      return res.status(200).send(`User registered: ${userName}`)
+    } else {
+      return res.status(409).send(`Error: new user could not be created`)
+    }
+}
+
+const isAuthenticatedUser = (
   req: Request,
   res: Response, 
   next: NextFunction) => {
-    const { userName, password } = req.body;
-    
+    if (req.session.user && req.session.user === req.body.userName) {
+      console.log("userAuthenticated")
+      next();
+    } else {
+      console.log('user not looged in')
+      return res.status(401).send("Error: User not logged in")
+    }
+}
 
-    const user = req.session.user;
-  next();
+const isValidUsername = async (
+  req: Request,
+  res: Response,
+  next: NextFunction) => {
+  const { userName } = req.body;
+  const isValid = await userExists(userName);
+  return isValid;
 }
 
 export {
-  useAuthentication,
+  isAuthenticatedUser,
+  isValidUsername,
   login,
   logout,
   register
