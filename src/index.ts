@@ -33,8 +33,8 @@ app.use('/', router);
 const server = https.createServer(server_certificates, app);
 
 server.listen(8443, function () {
-    console.log(
-      `Listening on port ${process.env.PORT}!`
-      + ` Go to https://localhost:${process.env.PORT}/`
-    );
-  });
+  console.log(
+    `Listening on port ${process.env.PORT}!`
+    + ` Go to https://localhost:${process.env.PORT}/`
+  );
+});

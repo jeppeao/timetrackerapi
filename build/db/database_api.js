@@ -16,7 +16,7 @@ const setupTables = async () => {
     const users = await new Promise((resolve, reject) => {
         pool.query(`CREATE TABLE IF NOT EXISTS users(
       user_id SERIAL PRIMARY KEY,
-      user_name TEXT,
+      user_name TEXT UNIQUE,
       password TEXT
     );`, (error, results) => {
             if (error) {

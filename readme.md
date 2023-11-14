@@ -3,7 +3,8 @@ To run app after download:
 2. run "npm install"
 3. run "openssl req -nodes -new -x509 -keyout server.key -out server.cert"
 4. add env.js file to src directory (see below)
-5. run "npm start"
+5. install redis
+6. run "npm start"
 
 example env.js file:
 """

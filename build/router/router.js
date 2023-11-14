@@ -2,6 +2,9 @@ import express from 'express';
 import { login, logout, register } from './../middleware/authentication.js';
 import { isAuthenticatedUser } from './../middleware/authentication.js';
 const router = express.Router();
+router.get("/", function (req, res, next) {
+    res.send("You are connected to the database api");
+});
 router.post("/", isAuthenticatedUser, function (req, res, next) {
     res.send("You are connected to the database api");
 });
