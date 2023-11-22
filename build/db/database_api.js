@@ -132,4 +132,36 @@ const setPassword = (body) => {
         });
     });
 };
-export { setupTables, createUser, deleteUser, getPassword, setPassword, getUser, };
+const createBlock = async (body) => {
+    const { username, startTime, endTime } = body;
+    const userID = (await getUser(username)).user_id;
+    return new Promise(function (resolve, reject) {
+        pool.query(`INSERT INTO blocks (user_id, start_time, end_time) 
+       VALUES ($1, $2, $3) 
+       RETURNING *`, [userID, startTime, endTime], (error, results) => {
+            if (error) {
+                reject(error);
+            }
+            resolve(results);
+        });
+    });
+};
+const getUserBlocks = async (body) => {
+    const { username, from, to } = body;
+    const userID = (await getUser(username)).user_id;
+    const query = `SELECT start_time, end_time 
+     FROM blocks
+     WHERE user_id = $1
+     AND start_time >= $2
+     AND end_time <= $3
+     `;
+    return new Promise(function (resolve, reject) {
+        pool.query(query, [userID, from, to], (error, results) => {
+            if (error) {
+                reject(error);
+            }
+            resolve(results.rows);
+        });
+    });
+};
+export { setupTables, createUser, deleteUser, getPassword, setPassword, getUser, createBlock, getUserBlocks };

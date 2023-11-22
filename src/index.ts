@@ -7,7 +7,7 @@ import router from './router/router.js';
 import { getCorsSetupper } from './middleware/cors.js';
 import { sessionSetup } from './middleware/session.js';
 import * as db from './db/database_api.js';
-
+import { getUserBlocks } from './middleware/dbActions.js';
 
 loadEnvironment();
 
