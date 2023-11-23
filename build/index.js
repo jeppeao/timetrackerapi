@@ -6,7 +6,6 @@ import router from './router/router.js';
 import { getCorsSetupper } from './middleware/cors.js';
 import { sessionSetup } from './middleware/session.js';
 import * as db from './db/database_api.js';
-import { getUserBlocks } from './db/database_api.js';
 loadEnvironment();
 const server_certificates = {
     key: fs.readFileSync("server.key"),
@@ -17,15 +16,6 @@ const app = express();
 app.use(express.json());
 app.use(getCorsSetupper(process.env.ALLOWED_ORIGIN));
 app.use(sessionSetup(process.env.SESSION_SECRET));
-// app.use((req: Request, res: Response, next: NextFunction) => {
-//   console.log("SessionID: ", req.sessionID)
-//   console.log("User: ", req.session.user)
-//   next();
-// })
-const from = new Date(Date.now() - 100000000000);
-const to = new Date(Date.now() + 1000000000);
-const rest = await getUserBlocks({ username: 'testUser', from, to });
-console.log('here is response ', rest);
 app.use('/', router);
 const server = https.createServer(server_certificates, app);
 server.listen(8443, function () {

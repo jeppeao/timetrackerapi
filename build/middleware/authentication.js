@@ -74,7 +74,6 @@ const isAuthenticatedUser = (req, res, next) => {
     }
     else {
         console.log('user not looged in');
-        console.log(req.session.user, req.body.username);
         return res.status(401).send("Error: User not logged in");
     }
 };

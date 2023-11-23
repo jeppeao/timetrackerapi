@@ -22,11 +22,6 @@ const app = express ();
 app.use(express.json());
 app.use(getCorsSetupper(process.env.ALLOWED_ORIGIN));
 app.use(sessionSetup(process.env.SESSION_SECRET));
-// app.use((req: Request, res: Response, next: NextFunction) => {
-//   console.log("SessionID: ", req.sessionID)
-//   console.log("User: ", req.session.user)
-//   next();
-// })
 
 app.use('/', router);
 

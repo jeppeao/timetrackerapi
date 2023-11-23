@@ -203,7 +203,7 @@ const getUserBlocks = async (body: {username:string, from: Date, to: Date}) => {
   const { username, from, to } = body;
   const userID = (await getUser(username)).user_id;
   const query = 
-    `SELECT start_time, end_time 
+    `SELECT block_id, start_time, end_time 
      FROM blocks
      WHERE user_id = $1
      AND start_time >= $2
@@ -211,6 +211,78 @@ const getUserBlocks = async (body: {username:string, from: Date, to: Date}) => {
      `;
   return new Promise(function(resolve, reject) {
     pool.query(query, [userID, from, to], (error, results) => {
+      if (error){
+        reject(error);
+      } 
+      resolve(results.rows);
+    });
+  }); 
+}
+
+const createTag = async (
+  body: {username: string, name: string }
+  ) => {
+  const { username, name } = body;
+  const userID = (await getUser(username)).user_id;
+  return new Promise(function(resolve, reject) {
+    pool.query(
+      `INSERT INTO tags (user_id, name) 
+       VALUES ($1, $2) 
+       RETURNING *`,
+      [userID, name], (error, results) => {
+        if (error){
+          reject(error);
+        } 
+        resolve(results);
+      });
+  }); 
+}
+
+const getUserTags = async (body: { username:string }) => {
+  const { username } = body;
+  const userID = (await getUser(username)).user_id;
+  const query = 
+    `SELECT name, tag_id 
+     FROM tags
+     WHERE user_id = $1
+     `;
+  return new Promise(function(resolve, reject) {
+    pool.query(query, [userID], (error, results) => {
+      if (error){
+        reject(error);
+      } 
+      resolve(results.rows);
+    });
+  }); 
+}
+
+const createBlocktag = async (
+  body: {tagID: string, blockID: string }
+  ) => {
+  const { tagID, blockID } = body;
+  return new Promise(function(resolve, reject) {
+    pool.query(
+      `INSERT INTO tags (tag_id, block_id) 
+       VALUES ($1, $2) 
+       RETURNING *`,
+      [tagID, blockID], (error, results) => {
+        if (error){
+          reject(error);
+        } 
+        resolve(results);
+      });
+  }); 
+}
+
+const getBlockTags = async (body: { blockID: number }) => {
+  const { blockID } = body;
+  const query = 
+    `SELECT tag_id
+     FROM blocktags
+     WHERE block_id = $1
+     `;
+  return new Promise(function(resolve, reject) {
+    pool.query(query, [blockID], (error, results) => {
       if (error){
         reject(error);
       } 
@@ -228,7 +300,9 @@ export {
   setPassword,
   getUser,
   createBlock,
-  getUserBlocks
+  getUserBlocks,
+  createTag,
+  createBlocktag
 }
 
 

@@ -149,7 +149,7 @@ const createBlock = async (body) => {
 const getUserBlocks = async (body) => {
     const { username, from, to } = body;
     const userID = (await getUser(username)).user_id;
-    const query = `SELECT start_time, end_time 
+    const query = `SELECT block_id, start_time, end_time 
      FROM blocks
      WHERE user_id = $1
      AND start_time >= $2
